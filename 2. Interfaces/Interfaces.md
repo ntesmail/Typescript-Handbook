@@ -130,7 +130,45 @@ mySearch = function(src: string, sub: string) {
 
 ### 数组类型
 
+与函数类型接口类似，我们也可以定义数组类型接口。数组类型接口包含对索引类型和返回值类型的定义。
 
+```ts
+interface StringArray {
+  [index: number]: string;
+}
+
+var myArray: StringArray;
+myArray = ["Bob", "Fred"];
+```
+
+我们支持的索引类型有2种：字符串和数字。在一个接口中同时支持这两种索引是允许的，但是有一个限制：数字索引返回值的类型必须为字符串索引返回值类型的子类。（译者注：通过实验，数字索引返回值的类型必须符合字符串索引返回值类型的 shape，比如下面这样也是可以的：）
+
+```ts
+interface A {
+	value: number;
+}
+
+interface B {
+	value: number;
+	type: string;
+}
+
+interface a {
+	[index: number]: B;
+	[index: string]: A;
+}
+```
+
+索引类型接口很适合于描述数字或者 dictionary 模式，但它要求接口中定义的其他属性必须与索引返回值的类型一致。例如，这个例子中的 length 属性不符合索引返回值的类型，类型检查器就会报错：
+
+```ts
+interface Dictionary {
+  [index: string]: string;
+  length: number;    // error, the type of 'length' is not a subtype of the indexer
+} 
+```
+
+### Class 类型
 
 
 
