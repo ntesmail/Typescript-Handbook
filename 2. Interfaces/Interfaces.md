@@ -170,11 +170,129 @@ interface Dictionary {
 
 ### Class 类型
 
+#### 实现一个接口
 
+在 C# 或者 Java 等语言中，接口最常见的用法是强制类实现某种约定，在 Typescript 也可以这样做。
 
+```ts
+interface ClockInterface {
+    currentTime: Date;
+}
 
+class Clock implements ClockInterface  {
+    currentTime: Date;
+    constructor(h: number, m: number) { }
+}
+```
 
+你同样可以在接口中定义一个方法并在类中实现，例如下面例子中的 setTime 方法：
 
+```ts
+interface ClockInterface {
+    currentTime: Date;
+    setTime(d: Date);
+}
 
+class Clock implements ClockInterface  {
+    currentTime: Date;
+    setTime(d: Date) {
+        this.currentTime = d;
+    }
+    constructor(h: number, m: number) { }
+}
+```
 
+接口只能用于描述了类的公开部分，不包括私有部分，所以你不能使用接口来强制一个类的私有部分也包含特定的类型。
 
+#### 类的静态部分和实例部分的区别（Difference between static/instance side of class）
+
+当同时使用类和接口时，你最好能记住类的成员有两种类型：静态成员类型和实例成员类型。如果你创建了一个带有构造函数的接口，并尝试创建一个类来实现这个接口，就会发生一个错误：
+
+```ts
+interface ClockInterface {
+    new (hour: number, minute: number);
+}
+
+class Clock implements ClockInterface  {
+    currentTime: Date;
+    constructor(h: number, m: number) { }
+}
+```
+
+这是因为当类实现一个接口时，只有类的实例成员会被检查。而构造函数作为类的静态成员，是不会进行检查的。
+
+所以，你需要通过某种方式与类的静态成员部分直接进行交流。请看下面的例子：
+
+```ts
+interface ClockStatic {
+    new (hour: number, minute: number);
+}
+
+class Clock  {
+    currentTime: Date;
+    constructor(h: number, m: number) { }
+}
+
+var cs: ClockStatic = Clock;
+var newClock = new cs(7, 30);
+```
+
+### 接口继承
+
+和类一样，接口之间也可以继承。通过继承可以避免在接口之间拷贝接口成员，也便于将接口拆分为不同用途的元件。
+
+```ts
+interface Shape {
+    color: string;
+}
+
+interface Square extends Shape {
+    sideLength: number;
+}
+
+var square: Square;
+square.color = "blue";
+square.sideLength = 10;
+```
+
+一个接口可以同时继承多个其他接口，从而创建一个包含其他所有接口的合集。
+
+```ts
+interface Shape {
+    color: string;
+}
+
+interface PenStroke {
+    penWidth: number;
+}
+
+interface Square extends Shape, PenStroke {
+    sideLength: number;
+}
+
+var square: Square;
+square.color = "blue";
+square.sideLength = 10;
+square.penWidth = 5.0;
+```
+
+### 混合类型
+
+接口可以用于描述 Javascript 中各种丰富的类型。由于 Javascript 动态和灵活的特点，你时常会遇到一个包含了以上介绍的各种类型的对象。
+
+例如下面这个对象，它即是一个方法，也是一个对象，同时还带有额外的属性：
+
+```ts
+interface Counter {
+    (start: number): string;
+    interval: number;
+    reset(): void;
+}
+
+var c: Counter;
+c(10);
+c.reset();
+c.interval = 5.0;
+```
+
+当需要与第三方 Javascript 代码相互调用时，你时常需要用到混合类型接口来完整的描述一个类型。
